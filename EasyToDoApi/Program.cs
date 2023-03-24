@@ -3,10 +3,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<EasyToDoApiContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("EasyToDoApiContext") ?? throw new InvalidOperationException("Connection string 'EasyToDoApiContext' not found.")));
+
 
 // Add services to the container.
+//https://learn.microsoft.com/en-us/aspnet/core/security/cors?view=aspnetcore-6.0
+builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin()));
+builder.Services.AddDbContext<EasyToDoApiContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("EasyToDoApiContext") ?? throw new InvalidOperationException("Connection string 'EasyToDoApiContext' not found.")));
 
 builder.Services.AddDbContext<ApplicationDbContext>(O => O.UseSqlServer(
     builder.Configuration.GetConnectionString("ApplicationDbContext")));
@@ -26,6 +29,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors();
 
 app.UseAuthorization();
 
