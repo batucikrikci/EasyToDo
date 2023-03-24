@@ -15,11 +15,16 @@
 
 <body>
     <div id="app">
+        <form @submit.prevent="addTodo()">
+            <input v-model="title" type="text" placeholder="What are you going to do?" required>
+            <button>Add</button>
+        </form>
         <ul>
-            <li v-for="todo in todos">
-                <input type="checkbox" v-model="todo.done">
+            <li v-for="todo in sortedTodos" :key="todo.id">
+                <input @change="updateTodo(to
+                )" type="checkbox" v-model="todo.done">
                 {{todo.title}}
-
+                <button @click="deleteTodo(todo)">&times;</button>
             </li>
         </ul>
     </div>
@@ -29,7 +34,8 @@
         Vue.createApp({
             data() {
                 return {
-                    todos: []
+                    todos: [],
+                    title: ""
                 };
             },
             mounted() {
@@ -37,6 +43,58 @@
                 fetch(apiUrl)
                     .then(res => res.json())
                     .then(data => this.todos = data);
+            },
+            methods: {
+                addTodo() {
+                    const newTodo = {
+                        title: this.title,
+                        done: false
+                    };
+                    this.title = "";
+                    fetch(apiUrl, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(newTodo)
+                    })
+                        .then(res => res.json())
+                        .then(data => this.todos.push(data));
+                },
+                updateTodo(todo) {
+                    fetch(`${apiUrl}/${todo.id}`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(todo)
+                    })
+                        .then(res => {
+                            if (res.ok) {
+                                // todo başarıyla güncellendi.
+                            }
+                            else
+                                // hata oluştu, geri al
+                                throw new Error("Todo güncellenemedi");
+                        })
+                        .catch(err => {
+                            //hata oluştu,geri al
+                            todo.done = !todo.done;
+                        });
+                },
+                deleteTodo(todo) {
+                    fetch(apiUrl + "/" + todo.id, {
+                        method: "delete"
+                    })
+                        .then(res => {
+                            if (res.ok) {
+                                this.todos = this.todos.filter(x => x.id != todo.id);
+                            }
+                        });
+                }
+            },
+            computed: {
+                sortedTodos() {
+                    return this.todos.sort((a, b) => a.done - b.done)
+                }
             }
         }).mount("#app");
 
