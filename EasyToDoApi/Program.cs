@@ -8,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 //https://learn.microsoft.com/en-us/aspnet/core/security/cors?view=aspnetcore-6.0
 builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin()));
+
 builder.Services.AddDbContext<EasyToDoApiContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("EasyToDoApiContext") ?? throw new InvalidOperationException("Connection string 'EasyToDoApiContext' not found.")));
 
